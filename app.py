@@ -1,71 +1,65 @@
 from flask import Flask, request, send_file
-from flask_cors import CORS
-from PIL import Image
+from wand.image import Image
 import os
 
 app = Flask(__name__)
-CORS(app)
 
-def is_valid_format(format):
-    valid_formats = ['heic', 'heif', 'avif', 'jpeg', 'jpg', 'png', 'tiff', 'webp', 'gif']
-    return format.lower() in valid_formats
+ALLOWED_FORMATS = ['heic', 'heif', 'avif', 'jpeg', 'jpg', 'png', 'tiff', 'webp', 'gif']
 
-def is_valid_image_format(file_path):
-    try:
-        Image.open(file_path).verify()
-        return True
-    except Exception as e:
-        print(f'Error checking image format: {e}')
-        return False
-
-@app.route('/api/convert', methods=['POST'])
-def handle_image_conversion():
+@app.route('/convert_image', methods=['POST'])
+def convert_image():
     print('API route hit')
 
-    if 'file' not in request.files:
-        return {'error': 'No file provided'}, 400
-
-    file = request.files['file']
-    format = request.form.get('format')
+    form = request.form
+    file = request.files.get('file')
+    format = form.get('format')
 
     print('Received file:', file.filename)
     print('Received format:', format)
 
-    if not file or not is_valid_format(format) or not is_valid_image_format(file.stream):
+    if not file or not is_valid_format(format) or not is_valid_image_format(file):
         print('Invalid file or image format')
         return {'error': 'Invalid file or image format'}, 400
 
-    input_file_path = f'./uploads/{file.filename}'
-    output_file_name = f'converted.{format}'
-    output_file_path = f'./public/{output_file_name}'  # Adjust the path as needed
+    input_file = file.stream
+    output_file_name = 'converted.' + format
+    output_file_path = os.path.join('static', output_file_name)  # Adjust the path as needed
 
     try:
         print('Converting image...')
 
-        # Use Pillow for image processing
-        image = Image.open(file.stream)
-        image.save(output_file_path, format=format.upper())
+        with Image(file=input_file) as img:
+            img.format = format.upper()
+            img.save(filename=output_file_path)
 
         print('Conversion successful')
 
         # Set response headers for download
-        return send_file(output_file_path, as_attachment=True, download_name=output_file_name)
+        response = send_file(output_file_path, as_attachment=True, download_name=output_file_name)
+        response.headers['Content-Type'] = f'image/{format}'
+        return response
     except Exception as e:
-        print(f'Error during conversion: {e}')
+        print('Error during conversion:', str(e))
         return {'error': 'Conversion failed'}, 500
     finally:
         try:
-            # Delete the input file
-            os.remove(input_file_path)
-            print('Deleted input file:', input_file_path)
+            # Delete the output file
+            os.remove(output_file_path)
+            print('Deleted output file:', output_file_path)
         except Exception as delete_error:
-            print(f'Error deleting input file: {delete_error}')
+            print('Error deleting output file:', str(delete_error))
+
+def is_valid_format(format):
+    return isinstance(format, str) and format.lower() in ALLOWED_FORMATS
+
+def is_valid_image_format(file):
+    # Check if the file format is one of the valid image formats
+    try:
+        Image(file=file.stream).format
+        return True
+    except Exception as error:
+        print('Error checking image format:', str(error))
+        return False
 
 if __name__ == '__main__':
-    if not os.path.exists('./uploads'):
-        os.makedirs('./uploads')
-
-    if not os.path.exists('./public'):
-        os.makedirs('./public')
-
-    app.run(debug=True, port=5000)
+    app.run(debug=True)
