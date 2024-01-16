@@ -1,7 +1,6 @@
 from flask import Flask, request, send_file
 from flask_cors import CORS
 from pillow_heif import register_heif_opener
-import pillow_avif
 from PIL import Image
 import os
 import imageio
