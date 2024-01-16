@@ -1,4 +1,7 @@
 Flask>=2.2.3
 Flask-Cors==3.0.10
 gunicorn==20.1.0
-imageio[freeimage]==2.9.0
+Flask==2.1.0
+imageio==2.14.0
+av==8.0.3  # Optional: This is for AVIF support
+Wand==0.6.6
