@@ -1,5 +1,5 @@
 from flask import Flask, request, send_file
-from flask_cors import CORS  # Import the CORS extension
+from flask_cors import CORS
 import os
 import shutil
 from PIL import Image
