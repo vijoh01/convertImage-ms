@@ -1,8 +1,12 @@
 from flask import Flask, request, send_file
 from flask_cors import CORS
+from pillow_heif import register_heif_opener
+import pillow_avif
 from PIL import Image
 import os
 import imageio
+
+register_heif_opener()
 
 app = Flask(__name__)
 CORS(app)
@@ -54,13 +58,8 @@ def handle_image_conversion():
         # Convert to RGB if image mode is RGBA
         if image.mode == 'RGBA':
             image = image.convert('RGB')
-
-        # Save HEIC, HEIF, and AVIF using imageio
-        if format.lower() in ['heic', 'heif', 'avif']:
-            convert_heic_to_jpeg(input_file_path, output_file_path)
         else:
-            output_format = format.upper() if format.lower() in ['jpeg', 'jpg'] else format.lower()
-            image.save(output_file_path, format=output_format)
+            image.save(output_file_path, format=format.upper(), save_all=True)
 
         print('Conversion successful')
 
