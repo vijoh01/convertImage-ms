@@ -3,7 +3,7 @@ from flask_cors import CORS
 from PIL import Image
 import os
 import imageio
-import avifio
+from av import open as av_open
 
 app = Flask(__name__)
 CORS(app)
@@ -26,11 +26,10 @@ def convert_heic_to_jpeg(heic_file_path, output_file_path):
     imageio.imsave(output_file_path, im)
 
 def decode_avif(avif_file_path):
-    # Use avifio to decode AVIF
-    with open(avif_file_path, 'rb') as f:
-        avif_data = f.read()
-    avif_image = avifio.read(avif_data)
-    return avif_image.to_pil()
+    # Use pyav to decode AVIF
+    container = av_open(avif_file_path)
+    for frame in container.decode(video=0):
+        frame.to_image().save(avif_file_path, 'AVIF')
 
 @app.route('/api/convert', methods=['POST'])
 def handle_image_conversion():
@@ -67,8 +66,7 @@ def handle_image_conversion():
         if format.lower() == 'heic':
             convert_heic_to_jpeg(input_file_path, output_file_path)
         elif format.lower() == 'avif':
-            avif_image = decode_avif(input_file_path)
-            avif_image.save(output_file_path, format='AVIF')
+            decode_avif(input_file_path)
         else:
             image.save(output_file_path, format=format.upper())
 
