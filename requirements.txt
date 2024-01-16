@@ -1,4 +1,4 @@
 Flask>=2.2.3
-Flask-Cors==3.0.10
+Flask-CORS==3.0.10
 gunicorn==20.1.0
-Wand==0.6.6
+Pillow==10.2.0
