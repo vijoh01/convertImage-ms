@@ -18,7 +18,7 @@ def is_valid_image_format(file_path):
         print(f'Error checking image format: {e}')
         return False
 
-@app.route('/', methods=['POST'])
+@app.route('/api/convert', methods=['POST'])
 def handle_image_conversion():
     print('API route hit')
 
