@@ -18,7 +18,7 @@ def is_valid_image_format(file_path):
         print(f'Error checking image format: {e}')
         return False
 
-@app.route('/api/convert', methods=['POST'])
+@app.route('/', methods=['POST'])
 def handle_image_conversion():
     print('API route hit')
 
@@ -44,6 +44,11 @@ def handle_image_conversion():
 
         # Use Pillow for image processing
         image = Image.open(file.stream)
+
+        # Convert to RGB if image mode is RGBA
+        if image.mode == 'RGBA':
+            image = image.convert('RGB')
+
         image.save(output_file_path, format=format.upper())
 
         print('Conversion successful')
