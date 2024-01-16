@@ -59,7 +59,8 @@ def handle_image_conversion():
         if format.lower() in ['heic', 'heif', 'avif']:
             convert_heic_to_jpeg(input_file_path, output_file_path)
         else:
-            image.save(output_file_path, format=format.upper())
+            output_format = format.upper() if format.lower() in ['jpeg', 'jpg'] else format.lower()
+            image.save(output_file_path, format=output_format)
 
         print('Conversion successful')
 
