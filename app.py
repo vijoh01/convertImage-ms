@@ -2,7 +2,10 @@ from flask import Flask, request, send_file
 from wand.image import Image
 import os
 
+from flask_cors import CORS
+
 app = Flask(__name__)
+CORS(app)
 
 ALLOWED_FORMATS = ['heic', 'heif', 'avif', 'jpeg', 'jpg', 'png', 'tiff', 'webp', 'gif']
 
