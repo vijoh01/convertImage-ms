@@ -4,3 +4,4 @@ gunicorn==20.1.0
 Pillow==10.2.0
 imageio[ffmpeg]==2.14.0
 pillow-heif==0.14.0
+pillow-avif==1.4.2
