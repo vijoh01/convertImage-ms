@@ -34,12 +34,6 @@ def decode_avif(avif_file_path):
 @app.route('/api/convert', methods=['POST'])
 def handle_image_conversion():
     print('API route hit')
-    
-    if not os.path.exists('./uploads'):
-        os.makedirs('./uploads')
-
-    if not os.path.exists('./public'):
-        os.makedirs('./public')
 
     if 'file' not in request.files:
         return {'error': 'No file provided'}, 400
@@ -54,9 +48,9 @@ def handle_image_conversion():
         print('Invalid file or image format')
         return {'error': 'Invalid file or image format'}, 400
 
-    input_file_path = f'./uploads/{file.filename}'
-    output_file_name = f'converted.{format}'
-    output_file_path = f'./public/{output_file_name}'  # Adjust the path as needed
+    input_file_path = f'/opt/render/project/src/uploads/{file.filename}'
+    output_file_name = f'converted.{format.lower()}'
+    output_file_path = f'/opt/render/project/src/public/{output_file_name}'  # Adjust the path as needed
 
     try:
         print('Converting image...')
@@ -86,10 +80,19 @@ def handle_image_conversion():
     finally:
         try:
             # Delete the input file
-            os.remove(input_file_path)
-            print('Deleted input file:', input_file_path)
+            if os.path.exists(input_file_path):
+                os.remove(input_file_path)
+                print('Deleted input file:', input_file_path)
+            else:
+                print('Input file does not exist:', input_file_path)
         except Exception as delete_error:
             print(f'Error deleting input file: {delete_error}')
 
 if __name__ == '__main__':
+    if not os.path.exists('./uploads'):
+        os.makedirs('./uploads')
+
+    if not os.path.exists('./public'):
+        os.makedirs('./public')
+
     app.run(debug=True, port=5000)
