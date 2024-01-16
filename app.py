@@ -7,7 +7,7 @@ import io
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/convert_image', methods=['POST'])
+@app.route('/api/convert', methods=['POST'])
 def convert_image_route():
     print('API route hit')
     
