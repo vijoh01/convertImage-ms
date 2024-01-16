@@ -2,10 +2,10 @@ from flask import Flask, request, send_file
 from flask_cors import CORS
 import os
 import shutil
-from PIL import Image
+import imageio
 
 app = Flask(__name__)
-CORS(app) 
+CORS(app)
 
 def is_valid_format(format):
     valid_formats = ['heic', 'heif', 'avif', 'jpeg', 'jpg', 'png', 'tiff', 'webp', 'gif']
@@ -13,8 +13,8 @@ def is_valid_format(format):
 
 def is_valid_image_format(file_path):
     try:
-        with Image.open(file_path):
-            return True
+        imageio.imread(file_path)
+        return True
     except Exception as e:
         print('Error checking image format:', str(e))
         return False
@@ -48,9 +48,9 @@ def convert_image():
         try:
             print('Converting image...')
 
-            # Use the Python Imaging Library (PIL) for image processing
-            with Image.open(uploaded_file_path) as img:
-                img.save(output_file_path, format=format)
+            # Use imageio to read and write images
+            img = imageio.imread(uploaded_file_path)
+            imageio.imwrite(output_file_path, img, format=format)
 
             print('Conversion successful')
 
