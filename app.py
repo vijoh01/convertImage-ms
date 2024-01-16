@@ -2,6 +2,8 @@ from flask import Flask, request, send_file
 from flask_cors import CORS
 from PIL import Image
 import os
+import imageio
+import avifio
 
 app = Flask(__name__)
 CORS(app)
@@ -17,6 +19,18 @@ def is_valid_image_format(file_path):
     except Exception as e:
         print(f'Error checking image format: {e}')
         return False
+
+def convert_heic_to_jpeg(heic_file_path, output_file_path):
+    # Use imageio to convert HEIC to JPEG
+    im = imageio.imread(heic_file_path)
+    imageio.imsave(output_file_path, im)
+
+def decode_avif(avif_file_path):
+    # Use avifio to decode AVIF
+    with open(avif_file_path, 'rb') as f:
+        avif_data = f.read()
+    avif_image = avifio.read(avif_data)
+    return avif_image.to_pil()
 
 @app.route('/api/convert', methods=['POST'])
 def handle_image_conversion():
@@ -49,7 +63,14 @@ def handle_image_conversion():
         if image.mode == 'RGBA':
             image = image.convert('RGB')
 
-        image.save(output_file_path, format=format.upper())
+        # Save HEIC, HEIF, and AVIF using specific handling
+        if format.lower() == 'heic':
+            convert_heic_to_jpeg(input_file_path, output_file_path)
+        elif format.lower() == 'avif':
+            avif_image = decode_avif(input_file_path)
+            avif_image.save(output_file_path, format='AVIF')
+        else:
+            image.save(output_file_path, format=format.upper())
 
         print('Conversion successful')
 
