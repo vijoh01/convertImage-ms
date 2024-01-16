@@ -1,8 +1,11 @@
 from flask import Flask, request, send_file
 from wand.image import Image
+from flask_cors import CORS  # Import the CORS module
 import os
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
+
 
 ALLOWED_FORMATS = ['heic', 'heif', 'avif', 'jpeg', 'jpg', 'png', 'tiff', 'webp', 'gif']
 
