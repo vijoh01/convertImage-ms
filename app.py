@@ -26,7 +26,7 @@ def convert_image():
 
     input_file = file.stream
     output_file_name = 'converted.' + format
-    output_file_path = os.path.join('static', output_file_name)  # Adjust the path as needed
+    output_file_path = os.path.join('public', output_file_name)  # Adjust the path as needed
 
     try:
         print('Converting image...')
