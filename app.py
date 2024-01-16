@@ -2,6 +2,7 @@ from flask import Flask, request, send_file
 from flask_cors import CORS
 import os
 import shutil
+from PIL import Image
 import imageio
 
 app = Flask(__name__)
@@ -13,8 +14,9 @@ def is_valid_format(format):
 
 def is_valid_image_format(file_path):
     try:
-        imageio.imread(file_path)
-        return True
+        # Use Pillow (PIL) for image format checking
+        with Image.open(file_path):
+            return True
     except Exception as e:
         print('Error checking image format:', str(e))
         return False
