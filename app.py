@@ -9,7 +9,7 @@ CORS(app)  # Enable CORS for all routes
 
 ALLOWED_FORMATS = ['heic', 'heif', 'avif', 'jpeg', 'jpg', 'png', 'tiff', 'webp', 'gif']
 
-@app.route('/convert_image', methods=['POST'])
+@app.route('/api/convert', methods=['POST'])
 def convert_image():
     print('API route hit')
 
