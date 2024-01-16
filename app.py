@@ -44,19 +44,22 @@ def handle_image_conversion():
     print('Received file:', file.filename)
     print('Received format:', format)
 
-    if not file or not is_valid_format(format) or not is_valid_image_format(file.stream):
-        print('Invalid file or image format')
-        return {'error': 'Invalid file or image format'}, 400
+    if not file or not is_valid_format(format):
+        print('Invalid file or format')
+        return {'error': 'Invalid file or format'}, 400
 
     input_file_path = f'/opt/render/project/src/uploads/{file.filename}'
     output_file_name = f'converted.{format.lower()}'
     output_file_path = f'/opt/render/project/src/public/{output_file_name}'  # Adjust the path as needed
 
     try:
+        # Save the file before processing
+        file.save(input_file_path)
+
         print('Converting image...')
 
         # Use Pillow for image processing
-        image = Image.open(file.stream)
+        image = Image.open(input_file_path)
 
         # Convert to RGB if image mode is RGBA
         if image.mode == 'RGBA':
