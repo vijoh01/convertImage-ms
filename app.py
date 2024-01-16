@@ -1,9 +1,9 @@
 from flask import Flask, request, send_file
 from flask_cors import CORS
-from PIL import Image
 import os
-import imageio
-from av import open as av_open
+from PIL import Image
+import pyheif
+import avif
 
 app = Flask(__name__)
 CORS(app)
@@ -19,17 +19,6 @@ def is_valid_image_format(file_path):
     except Exception as e:
         print(f'Error checking image format: {e}')
         return False
-
-def convert_heic_to_jpeg(heic_file_path, output_file_path):
-    # Use imageio to convert HEIC to JPEG
-    im = imageio.imread(heic_file_path)
-    imageio.imsave(output_file_path, im)
-
-def decode_avif(avif_file_path):
-    # Use pyav to decode AVIF
-    container = av_open(avif_file_path)
-    for frame in container.decode(video=0):
-        frame.to_image().save(avif_file_path, 'AVIF')
 
 @app.route('/api/convert', methods=['POST'])
 def handle_image_conversion():
@@ -58,19 +47,31 @@ def handle_image_conversion():
 
         print('Converting image...')
 
-        # Use Pillow for image processing
-        image = Image.open(input_file_path)
-
-        # Convert to RGB if image mode is RGBA
-        if image.mode == 'RGBA':
-            image = image.convert('RGB')
-
-        # Save HEIC, HEIF, and AVIF using specific handling
-        if format.lower() == 'heic':
-            convert_heic_to_jpeg(input_file_path, output_file_path)
+        if format.lower() in ['heic', 'heif']:
+            # Use pyheif to convert HEIC and HEIF to JPEG
+            heif_file = pyheif.read(input_file_path)
+            image = Image.frombytes(
+                heif_file.mode, 
+                heif_file.size, 
+                heif_file.data,
+                "raw",
+                heif_file.mode,
+                heif_file.stride,
+            )
+            image.save(output_file_path, format="JPEG")
         elif format.lower() == 'avif':
-            decode_avif(input_file_path)
+            # Use avif to convert AVIF to JPEG
+            avif_data = avif.read(input_file_path)
+            image = Image.frombytes('RGB', (1, 1), avif_data)
+            image.save(output_file_path, format="JPEG")
         else:
+            # Use Pillow for other formats
+            image = Image.open(input_file_path)
+
+            # Convert to RGB if image mode is RGBA
+            if image.mode == 'RGBA':
+                image = image.convert('RGB')
+
             image.save(output_file_path, format=format.upper())
 
         print('Conversion successful')
@@ -83,19 +84,16 @@ def handle_image_conversion():
     finally:
         try:
             # Delete the input file
-            if os.path.exists(input_file_path):
-                os.remove(input_file_path)
-                print('Deleted input file:', input_file_path)
-            else:
-                print('Input file does not exist:', input_file_path)
+            os.remove(input_file_path)
+            print('Deleted input file:', input_file_path)
         except Exception as delete_error:
             print(f'Error deleting input file: {delete_error}')
 
 if __name__ == '__main__':
-    if not os.path.exists('/opt/render/project/src/uploads'):
-        os.makedirs('/opt/render/project/src/uploads')
+    if not os.path.exists('./uploads'):
+        os.makedirs('./uploads')
 
-    if not os.path.exists('/opt/render/project/src/public'):
-        os.makedirs('/opt/render/project/src/public')
+    if not os.path.exists('./public'):
+        os.makedirs('./public')
 
     app.run(debug=True, port=5000)
