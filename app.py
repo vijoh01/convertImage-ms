@@ -34,6 +34,12 @@ def decode_avif(avif_file_path):
 @app.route('/api/convert', methods=['POST'])
 def handle_image_conversion():
     print('API route hit')
+    
+    if not os.path.exists('./uploads'):
+        os.makedirs('./uploads')
+
+    if not os.path.exists('./public'):
+        os.makedirs('./public')
 
     if 'file' not in request.files:
         return {'error': 'No file provided'}, 400
@@ -86,10 +92,4 @@ def handle_image_conversion():
             print(f'Error deleting input file: {delete_error}')
 
 if __name__ == '__main__':
-    if not os.path.exists('./uploads'):
-        os.makedirs('./uploads')
-
-    if not os.path.exists('./public'):
-        os.makedirs('./public')
-
     app.run(debug=True, port=5000)
