@@ -89,10 +89,10 @@ def handle_image_conversion():
             print(f'Error deleting input file: {delete_error}')
 
 if __name__ == '__main__':
-    if not os.path.exists('./uploads'):
-        os.makedirs('./uploads')
+    if not os.path.exists('/opt/render/project/src/uploads'):
+        os.makedirs('/opt/render/project/src/uploads')
 
-    if not os.path.exists('./public'):
-        os.makedirs('./public')
+    if not os.path.exists('/opt/render/project/src/public'):
+        os.makedirs('/opt/render/project/src/public')
 
     app.run(debug=True, port=5000)
