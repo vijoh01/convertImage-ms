@@ -25,7 +25,7 @@ def convert_image_route():
         image = Image.open(file)
 
         # Convert the image
-        output_image = convert_image_pillow(image, format)
+        output_image = convert_image(image, format)
 
         # Save the converted image to a buffer
         output_buffer = io.BytesIO()
@@ -37,14 +37,21 @@ def convert_image_route():
     except Exception as e:
         return {'error': f'Error converting image: {str(e)}'}, 500
 
-def convert_image_pillow(image, output_format):
+def convert_image(image, output_format):
     try:
-        # Save using Pillow
-        output_image = Image.new("RGB", image.size)
-        output_image.paste(image)
+        # Convert the image using Pillow or OpenCV based on the format
+        if output_format.upper() in ["JPEG", "PNG", "BMP", "TIFF", "WEBP", "GIF", "ICO", "JP2", "AVIF"]:
+            # Use Pillow for supported formats
+            output_image = Image.new("RGB", image.size)
+            output_image.paste(image)
+        else:
+            # Use OpenCV for other formats
+            output_image = cv2.cvtColor(numpy.array(image), cv2.COLOR_RGB2BGR)
+
         return output_image
-    except Exception as e_pillow:
-        print(f"Pillow conversion error: {e_pillow}")
+
+    except Exception as e:
+        print(f"Error during image conversion: {e}")
         raise
 
 if __name__ == '__main__':
